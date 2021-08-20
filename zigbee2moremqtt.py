@@ -7,13 +7,25 @@ MQTT_HOST = os.getenv('MQTT_HOST')
 MQTT_PORT = int(os.getenv('MQTT_PORT', 1883))
 MQTT_USER = os.getenv('MQTT_USER')
 MQTT_PASSWORD = os.getenv('MQTT_PASSWORD')
-MQTT_CLIENT = os.getenv('MQTT_CLIENT', 't2t2m2p2m2ha-dekala')
+MQTT_CLIENT = os.getenv('MQTT_CLIENT', 'zigbee2moremqtt')
 MQTT_QOS = int(os.getenv('MQTT_QOS', 1))
+SAGE_SWITCH_TOPIC = os.getenv('SAGE_SWITCH_TOPIC', 'zigbee2mqtt/Sage Switch 1/')
 
-# from secrets import MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASSWORD, MQTT_CLIENT, MQTT_QOS
+ON_1_PRESS_TOPIC = os.getenv('ON_1_PRESS_TOPIC', '')
+ON_2_PRESS_TOPIC = os.getenv('ON_2_PRESS_TOPIC', '')
+ON_3_PRESS_TOPIC = os.getenv('ON_3_PRESS_TOPIC', '')
+ON_1_PRESS_PAYLOAD = os.getenv('ON_1_PRESS_PAYLOAD', '')
+ON_2_PRESS_PAYLOAD = os.getenv('ON_2_PRESS_PAYLOAD', '')
+ON_3_PRESS_PAYLOAD = os.getenv('ON_3_PRESS_PAYLOAD', '')
 
-sage_switch_topic = 'zigbee2mqtt/Sage Switch 1/'
-extra_bathroom_switch_topic = 'cmnd/tasmota_87F311/'
+OFF_1_PRESS_TOPIC = os.getenv('OFF_1_PRESS_TOPIC', '')
+OFF_2_PRESS_TOPIC = os.getenv('OFF_2_PRESS_TOPIC', '')
+OFF_3_PRESS_TOPIC = os.getenv('OFF_3_PRESS_TOPIC', '')
+OFF_1_PRESS_PAYLOAD = os.getenv('OFF_1_PRESS_PAYLOAD', '')
+OFF_2_PRESS_PAYLOAD = os.getenv('OFF_2_PRESS_PAYLOAD', '')
+OFF_3_PRESS_PAYLOAD = os.getenv('OFF_3_PRESS_PAYLOAD', '')
+
+# from secrets import MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASSWORD, MQTT_CLIENT, MQTT_QOS, SAGE_SWITCH_TOPIC, ON_1_PRESS_TOPIC, ON_2_PRESS_TOPIC, ON_3_PRESS_TOPIC, OFF_1_PRESS_TOPIC, OFF_2_PRESS_TOPIC, OFF_3_PRESS_TOPIC, ON_1_PRESS_PAYLOAD, ON_2_PRESS_PAYLOAD, ON_3_PRESS_PAYLOAD, OFF_1_PRESS_PAYLOAD, OFF_2_PRESS_PAYLOAD, OFF_3_PRESS_PAYLOAD
 
 press_on_time = 0
 press_on_count = 0
@@ -24,26 +36,26 @@ press_off_count = 0
 
 def send_press_on():
     global press_on_count
-    publish(sage_switch_topic + 'more_actions', payload='on_%d' % press_on_count)
+    publish(SAGE_SWITCH_TOPIC + 'more_actions', payload='on_%d' % press_on_count)
     if press_on_count == 1:
-        publish(extra_bathroom_switch_topic + 'Power1', payload='ON')
+        if ON_1_PRESS_TOPIC: publish(ON_1_PRESS_TOPIC, payload=ON_1_PRESS_PAYLOAD)
     elif press_on_count == 2:
-        publish(extra_bathroom_switch_topic + 'Power2', payload='ON')
+        if ON_2_PRESS_TOPIC: publish(ON_2_PRESS_TOPIC, payload=ON_2_PRESS_PAYLOAD)
     elif press_on_count == 3:
-        publish(extra_bathroom_switch_topic + 'Power3', payload='ON')
+        if ON_3_PRESS_TOPIC: publish(ON_3_PRESS_TOPIC, payload=ON_3_PRESS_PAYLOAD)
     else:
         print('screaming into the void')
     press_on_count = 0
 
 def send_press_off():
     global press_off_count
-    publish(sage_switch_topic + 'more_actions', payload='off_%d' % press_off_count)
+    publish(SAGE_SWITCH_TOPIC + 'more_actions', payload='off_%d' % press_off_count)
     if press_off_count == 1:
-        publish(extra_bathroom_switch_topic + 'Power1', payload='OFF')
+        if OFF_1_PRESS_TOPIC: publish(OFF_1_PRESS_TOPIC, payload=OFF_1_PRESS_PAYLOAD)
     elif press_off_count == 2:
-        publish(extra_bathroom_switch_topic + 'Power2', payload='OFF')
+        if OFF_2_PRESS_TOPIC: publish(OFF_2_PRESS_TOPIC, payload=OFF_2_PRESS_PAYLOAD)
     elif press_off_count == 3:
-        publish(extra_bathroom_switch_topic + 'Power3', payload='OFF')
+        if OFF_3_PRESS_TOPIC: publish(OFF_3_PRESS_TOPIC, payload=OFF_3_PRESS_PAYLOAD)
     else:
         print('screaming into the void')
     press_off_count = 0
@@ -55,7 +67,7 @@ def millis():
 def on_connect(client, userdata, flags, rc):
     print('Connected with result code '+str(rc))
     if rc == 0:
-        client.subscribe(sage_switch_topic + '#')
+        client.subscribe(SAGE_SWITCH_TOPIC + '#')
 
 def on_message(client, userdata, msg):
     global press_on_time
@@ -64,7 +76,7 @@ def on_message(client, userdata, msg):
     global press_off_count
 
     payload_str = str(msg.payload.decode("utf-8"))
-    if msg.topic == sage_switch_topic + 'action':
+    if msg.topic == SAGE_SWITCH_TOPIC + 'action':
         if payload_str == 'on':
             press_on_count += 1
             press_on_time = millis()
