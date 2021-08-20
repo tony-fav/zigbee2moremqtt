@@ -9,7 +9,7 @@ MQTT_USER = os.getenv('MQTT_USER')
 MQTT_PASSWORD = os.getenv('MQTT_PASSWORD')
 MQTT_CLIENT = os.getenv('MQTT_CLIENT', 'zigbee2moremqtt')
 MQTT_QOS = int(os.getenv('MQTT_QOS', 1))
-SAGE_SWITCH_TOPIC = os.getenv('SAGE_SWITCH_TOPIC', 'zigbee2mqtt/Sage Switch 1/')
+SAGE_SWITCH_TOPIC = os.getenv('SAGE_SWITCH_TOPIC')
 
 ON_1_PRESS_TOPIC = os.getenv('ON_1_PRESS_TOPIC', '')
 ON_2_PRESS_TOPIC = os.getenv('ON_2_PRESS_TOPIC', '')
